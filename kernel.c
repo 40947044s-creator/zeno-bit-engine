@@ -7,7 +7,7 @@
  */
 uint64_t bitwise_add(uint64_t a, uint64_t b) {
     while (b != 0) {
-        uint64_t sum = a ^ b;            // Sum without carries
+        uint64_t sum = a ^ b;             // Sum without carries
         uint64_t carry = (a & b) << 1;    // The Energy pushing to next bit
         a = sum;
         b = carry;

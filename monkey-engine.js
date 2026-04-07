@@ -1,4 +1,4 @@
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "; // 27 Characters
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "; 
 
 let targetStr = "";
 let monkeyBuffers = [];
@@ -7,7 +7,7 @@ let isRunning = false;
 let animationId;
 let totalKeystrokes = 0;
 
-// --- PERSISTENCE ENGINE (Solves the Pause Problem) ---
+// --- PERSISTENCE ENGINE ---
 function saveState() {
     localStorage.setItem('zeno_lastActive', Date.now());
     localStorage.setItem('zeno_totalKeystrokes', totalKeystrokes);
@@ -18,20 +18,15 @@ function loadState() {
     const savedKeystrokes = localStorage.getItem('zeno_totalKeystrokes');
     const numMonkeys = parseInt(document.getElementById('monkeyCount').value) || 10000;
     
-    if (savedKeystrokes) {
-        totalKeystrokes = parseInt(savedKeystrokes);
-    }
+    if (savedKeystrokes) totalKeystrokes = parseInt(savedKeystrokes);
     
     if (lastActive) {
         const timeAwaySec = Math.floor((Date.now() - parseInt(lastActive)) / 1000);
-        // 60 frames per second * number of monkeys
         const missedKeystrokes = timeAwaySec * 60 * numMonkeys; 
         totalKeystrokes += missedKeystrokes;
-        console.log(`Offline computation synced. Added ${missedKeystrokes} keystrokes.`);
     }
 }
 
-// Attach persistence to browser events
 window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') saveState();
     else loadState();
@@ -42,8 +37,6 @@ window.addEventListener('beforeunload', saveState);
 function calculateMath() {
     const len = document.getElementById('target').value.length;
     const monkeys = parseInt(document.getElementById('monkeyCount').value);
-    
-    // (27^L) / (monkeys * 60 keystrokes per second)
     let seconds = Math.pow(27, len) / (monkeys * 60);
     
     let displayTime;
@@ -64,7 +57,6 @@ function startSimulation() {
     
     if (len === 0) return;
 
-    // Allocate memory
     monkeyBuffers = Array.from({ length: numMonkeys }, () => Array(len).fill(' '));
     monkeyScores = new Int32Array(numMonkeys);
     
@@ -87,34 +79,22 @@ function tick() {
 
     let bestScore = -1;
 
-    // The Universe Loop
     for (let i = 0; i < monkeyBuffers.length; i++) {
         let buffer = monkeyBuffers[i];
-        
-        // Shift buffer left
-        for (let j = 0; j < buffer.length - 1; j++) {
-            buffer[j] = buffer[j + 1];
-        }
-        
-        // New random keystroke
+        for (let j = 0; j < buffer.length - 1; j++) buffer[j] = buffer[j + 1];
         buffer[buffer.length - 1] = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
 
-        // Evaluate Fitness
         let score = getHammingScore(buffer);
         monkeyScores[i] = score;
-
         if (score > bestScore) bestScore = score;
     }
 
-    // Global Stats
     totalKeystrokes += monkeyBuffers.length;
     document.getElementById('total-keys').innerText = totalKeystrokes.toLocaleString();
 
-    // Sort and Update UI (Top 10 only)
     let sortedIndices = Array.from(monkeyScores.keys()).sort((a, b) => monkeyScores[b] - monkeyScores[a]);
     updateDOM(sortedIndices.slice(0, 10));
 
-    // Halt condition
     if (bestScore === targetStr.length) {
         isRunning = false;
         console.log("Truth String Found! Wave function collapsed.");
@@ -133,11 +113,8 @@ function updateDOM(topIndices) {
         
         let htmlStr = "";
         for(let i=0; i < buffer.length; i++) {
-            if(buffer[i] === targetStr[i]) {
-                htmlStr += `<span class="match">${buffer[i]}</span>`;
-            } else {
-                htmlStr += buffer[i];
-            }
+            if(buffer[i] === targetStr[i]) htmlStr += `<span class="match">${buffer[i]}</span>`;
+            else htmlStr += buffer[i];
         }
 
         const li = document.createElement('li');
@@ -150,8 +127,8 @@ function updateDOM(topIndices) {
     });
 }
 
-// --- AUTO START ---
+// Auto-start
 window.onload = function() {
     loadState();
-    setTimeout(startSimulation, 500); // 500ms cinematic delay
+    setTimeout(startSimulation, 500); 
 };

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeno Bit-Engine: Newton vs NP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="header">
+        <h1>159 UTC Observer: Gravity as Bit-Shift</h1>
+        <button onclick="startRace()">Start Inference Race</button>
+    </div>
+    
+    <div class="container">
+        <div class="panel" id="newton-panel">
+            <h2>Newton (Calculus)</h2>
+            <div id="apple-newton" class="apple red"></div>
+            <div class="stats" id="stats-newton">y = h - ½gt²</div>
+        </div>
+
+        <div class="panel" id="np-panel">
+            <h2>NP Inference (LSB Stack)</h2>
+            <div id="apple-np" class="apple ghost"></div>
+            <div class="stats" id="stats-np">Truth String: 0x...</div>
+        </div>
+    </div>
+
+    <script src="engine.js"></script>
+</body>
+</html>

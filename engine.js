@@ -1,47 +1,46 @@
-// ISO Standard Initial States
-let h_newton = 550;
-let posBits = 0x0000000000000200n; // Height in Bit-Stack (approx 512)
+let h_newton = 550.0;
+let v_newton = 0.0; 
+
+let posBits = 550n; 
 let velBits = 0n;
-const gravity = 1n;
+const gravityBits = 1n;
 
 function runExperiment() {
     const red = document.getElementById('apple-red');
     const ghost = document.getElementById('apple-ghost');
     const debug = document.getElementById('bits');
 
-    // Reset positions for multiple runs
-    h_newton = 550;
-    posBits = 0x0000000000000200n;
+    h_newton = 550.0;
+    v_newton = 0.0;
+    posBits = 550n;
     velBits = 0n;
-    ghost.style.background = "rgba(0, 255, 65, 0.4)"; // Reset ghost color
+    ghost.style.background = "rgba(0, 255, 65, 0.4)";
 
     function step() {
-        // --- PANEL 1: NEWTON (The Continuous Control) ---
-        if (h_newton > 30) {
-            h_newton -= 4.5; // Simplified continuous float gravity
-            red.style.top = (600 - h_newton) + "px";
-        }
+        // Newton
+        v_newton += 1.0;          
+        h_newton -= v_newton;     
+        if (h_newton <= 0) h_newton = 0; 
+        red.style.top = (600 - h_newton) + "px";
 
-        // --- PANEL 2: NP INFERENCE (The Discrete Engine) ---
-        velBits = velBits + gravity; // Accumulate velocity
+        // NP Inference
+        velBits = velBits + gravityBits; 
         
-        let Nc = BigInt(Math.floor(Math.random() * 5)); // Dynamic Computational Noise
+        if (velBits >= posBits) posBits = 0n; 
+        else posBits = posBits - velBits; 
         
-        posBits = posBits - velBits; // Discrete step toward bedrock
-        
-        let truthString = posBits ^ Nc; // The XOR Interference
+        let Nc = BigInt(Math.floor(Math.random() * 5)); 
+        let truthString = (posBits === 0n) ? 0n : (posBits ^ Nc); 
 
-        // Visualize the "Hidden Secret"
         let visualY = 600 - Number(truthString);
         ghost.style.top = visualY + "px";
         debug.innerText = `Truth: 0x${truthString.toString(16).toUpperCase()}`;
 
-        // TERMINATION: Stop when the Bitstring hits Bedrock (0)
-        if (truthString > 0n && visualY < 570) {
+        if (posBits > 0n || h_newton > 0) {
             requestAnimationFrame(step);
         } else {
-            ghost.style.background = "#ffff00"; // Highlight on impact
-            console.log("Inference Resolved at Bedrock (Zeno Limit Reached).");
+            ghost.style.background = "#ffff00";
+            console.log("Inference and Calculus Resolved at 0.");
         }
     }
     step();

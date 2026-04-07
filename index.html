@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zeno Bit-Engine: Newton vs NP</title>
+    <title>NP-Monkey Inference Engine</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="ui">
-        <h2>159 UTC Observer: Gravity as Bit-Shift</h2>
-        <button onclick="runExperiment()">Start Racing Inference</button>
+        <h2>The Stochastic Typewriter (NIV Bible Scale)</h2>
+        <div class="controls">
+            <label>Target Text:</label>
+            <input type="text" id="target" value="IN THE BEGINNING" maxlength="50" oninput="this.value = this.value.toUpperCase()">
+            
+            <label>Monkeys (Threads):</label>
+            <input type="number" id="monkeyCount" value="10000" min="10" max="50000">
+            
+            <button onclick="startSimulation()">Restart Universe</button>
+        </div>
+        <div id="stats">
+            <div>Theoretical Expected Time: <span id="math-time" class="highlight">...</span></div>
+            <div id="total-keys-display">Total Lifetime Keystrokes: <span id="total-keys" class="highlight">0</span></div>
+        </div>
     </div>
+
     <div class="stage">
-        <div class="panel" id="newton">
-            <h3>Newton (Classical)</h3>
-            <div class="apple red" id="apple-red"></div>
-        </div>
-        <div class="panel" id="np">
-            <h3>NP Inference (Discrete)</h3>
-            <div class="apple ghost" id="apple-ghost"></div>
-            <div id="bits" class="debug">Truth String: 0x0</div>
+        <div class="panel" id="leaderboard">
+            <h3>Top 10 Monkeys (Lowest Hamming Distance)</h3>
+            <ul id="rankings">
+                </ul>
         </div>
     </div>
-    <script src="engine.js"></script>
+    <script src="monkey-engine.js"></script>
 </body>
 </html>

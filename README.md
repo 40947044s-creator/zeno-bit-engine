@@ -12,3 +12,4 @@ A visual translation of Newtonian calculus (y = h - ½gt²) into raw machine cod
 * `monkey-engine.js` - Real-time buffer allocation and persistent offline processing.
 * `engine.js` - The discrete falling logic.
 * `kernel.c` - The "Assembly of Reality" underlying the bitwise logic gates.
+https://40947044s-creator.github.io/zeno-bit-engine/

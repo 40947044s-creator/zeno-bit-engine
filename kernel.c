@@ -22,7 +22,7 @@ uint64_t compute_step(uint64_t pos, uint64_t vel, uint64_t g, uint64_t nc) {
     // 1. vel = vel + g
     uint64_t next_vel = bitwise_add(vel, g);
     
-    // 2. pos = pos - vel (Two's Complement Subtraction)
+    // 2. pos = pos - vel (Two's Complement Subtraction for falling)
     uint64_t neg_vel = bitwise_add(~next_vel, 1);
     uint64_t next_pos = bitwise_add(pos, neg_vel);
 

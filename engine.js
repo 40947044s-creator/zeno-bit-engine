@@ -1,38 +1,40 @@
-// ISO Standard "Bedrock" (Ground Level)
-const BEDROCK = 0n; 
-// ISO Standard "Apple" bit-representation (using a BigInt as a 64-bit stack)
-let appleBits = 0x4059000000000000n; 
-let newtonY = 50; // Visual starting point
+// Initial States (ISO Standard Table Lookups)
+let h_newton = 550;
+let posBits = 0x0000000000000200n; // Height in Bit-Stack
+let velBits = 0n;
+const gravity = 1n;
 
-function startRace() {
-    const newtonApple = document.getElementById('apple-newton');
-    const npApple = document.getElementById('apple-np');
-    const npStats = document.getElementById('stats-np');
+function runExperiment() {
+    const red = document.getElementById('apple-red');
+    const ghost = document.getElementById('apple-ghost');
+    const debug = document.getElementById('bits');
 
-    function frame() {
-        // --- 1. Newton Operator (Classical) ---
-        if (newtonY < 450) {
-            newtonY += 2.5; // Stolen gravity constant
-            newtonApple.style.top = newtonY + "px";
+    function step() {
+        // --- PANEL 1: NEWTON (The Control) ---
+        if (h_newton > 30) {
+            h_newton -= 5; // Simplified Gravity
+            red.style.top = (600 - h_newton) + "px";
         }
 
-        // --- 2. NP Inference (Lower Layer) ---
-        // The "Quicker Formula": Shift Right toward LSB + Computational Noise
-        let Nc = BigInt(Math.floor(Math.random() * 0xFFFFFF)); // Dynamic Noise
-        
-        // Logical "Fall": bit-shifting the stack
-        appleBits = (appleBits >> 1n) ^ Nc;
+        // --- PANEL 2: NP INFERENCE (The Engine) ---
+        // Simulating the kernel.c logic in JS for static hosting
+        velBits = velBits + gravity; 
+        let Nc = BigInt(Math.floor(Math.random() * 4)); // Dynamic Noise
+        posBits = posBits - velBits;
+        let truthString = posBits ^ Nc;
 
-        // Visualizing the "Truth String"
-        let visualPos = Number(appleBits % 400n) + 50; 
-        npApple.style.top = visualPos + "px";
-        npStats.innerText = "Truth String: 0x" + appleBits.toString(16).toUpperCase();
+        // Visualize the "Hidden Secret"
+        let visualY = 600 - Number(truthString);
+        ghost.style.top = visualY + "px";
+        debug.innerText = `Truth: 0x${truthString.toString(16).toUpperCase()}`;
 
-        if (newtonY < 450) {
-            requestAnimationFrame(frame);
+        // TERMINATION: Both stop when the Bitstring hits Bedrock
+        if (truthString > 0n && visualY < 570) {
+            requestAnimationFrame(step);
         } else {
-            console.log("Impact Resolved at 159 UTC.");
+            ghost.style.background = "yellow";
+            console.log("Inference Resolved at Bedrock.");
         }
     }
-    frame();
+    step();
 }

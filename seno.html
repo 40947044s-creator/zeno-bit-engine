@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeno Bit-Engine: Newton vs NP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="ui">
+        <h2>159 UTC Observer: Gravity as Bit-Shift</h2>
+        <button onclick="runExperiment()">Start Inference Race</button>
+        <a href="index.html" style="color:#0a0; margin-left:20px;">[Back to Monkey Engine]</a>
+    </div>
+    <div class="stage">
+        <div class="panel" id="newton">
+            <h3>Newton (Classical FPU)</h3>
+            <div class="apple red" id="apple-red"></div>
+        </div>
+        <div class="panel" id="np">
+            <h3>NP Inference (Discrete ALU)</h3>
+            <div class="apple ghost" id="apple-ghost"></div>
+            <div id="bits" class="debug">Truth String: 0x0</div>
+        </div>
+    </div>
+    <script src="engine.js"></script>
+</body>
+</html>

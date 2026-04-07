@@ -1,52 +1,83 @@
 // Replace everything from function tick() down to the end of updateDOM()
 
+// --- THE GENETIC BOOLEAN KERNEL ---
+
+let frameCounter = 0; // Used to slow down the visual updates so the screen doesn't freeze
+
 function tick() {
     if (!isRunning) return;
 
+    // 1. Evaluate Fitness of the current universe
     let bestScore = -1;
-    
-    // THE OPTIMIZATION: Only track the Top 10 champions, don't sort the whole universe
-    let top10Ids = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
-    let top10Scores = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+    let topMonkeys = [];
 
-    // The Universe Loop
     for (let i = 0; i < monkeyBuffers.length; i++) {
         let buffer = monkeyBuffers[i];
-        
-        // Shift buffer left
-        for (let j = 0; j < buffer.length - 1; j++) {
-            buffer[j] = buffer[j + 1];
-        }
-        
-        // New random keystroke
-        buffer[buffer.length - 1] = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
-
-        // Evaluate Fitness (Inlined for maximum speed)
         let score = 0;
         for (let s = 0; s < targetStr.length; s++) {
             if (buffer[s] === targetStr[s]) score++;
         }
-        
-        monkeyScores[i] = score; // Save score for the UI
+        monkeyScores[i] = score;
+
         if (score > bestScore) bestScore = score;
 
-        // Instantly check if this monkey belongs on the Leaderboard
-        if (score > top10Scores[9]) {
-            let insertIdx = 9;
-            // Find its rightful rank
-            while (insertIdx > 0 && score > top10Scores[insertIdx - 1]) {
-                insertIdx--;
-            }
-            // Shift the lower monkeys down
-            for (let k = 9; k > insertIdx; k--) {
-                top10Scores[k] = top10Scores[k - 1];
-                top10Ids[k] = top10Ids[k - 1];
-            }
-            // Insert the new champion
-            top10Scores[insertIdx] = score;
-            top10Ids[insertIdx] = i;
+        // Keep track of the top performers to act as "Parents"
+        if (score > (targetStr.length / 3)) { // Only let the somewhat-good monkeys breed
+            topMonkeys.push(buffer.slice()); 
         }
     }
+
+    // 2. THE BOOLEAN COLLISION (Cross-Over & Mutation)
+    if (topMonkeys.length > 2) {
+        for (let i = 0; i < monkeyBuffers.length; i++) {
+            // Keep the absolute best monkeys untouched (Elitism)
+            if (monkeyScores[i] === bestScore) continue; 
+
+            // Pick two random parents from the top pool
+            let parentA = topMonkeys[Math.floor(Math.random() * topMonkeys.length)];
+            let parentB = topMonkeys[Math.floor(Math.random() * topMonkeys.length)];
+            
+            // Boolean Multiplexer: Take some from A, some from B
+            for (let c = 0; c < targetStr.length; c++) {
+                // 50% chance to take from Parent A or Parent B
+                monkeyBuffers[i][c] = (Math.random() > 0.5) ? parentA[c] : parentB[c];
+                
+                // XOR Mutation: 5% chance the bit flips entirely to random noise
+                if (Math.random() < 0.05) {
+                    monkeyBuffers[i][c] = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+                }
+            }
+        }
+    } else {
+        // If no monkeys are good yet, just mutate randomly (XOR noise)
+        for (let i = 0; i < monkeyBuffers.length; i++) {
+            let randIdx = Math.floor(Math.random() * targetStr.length);
+            monkeyBuffers[i][randIdx] = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+        }
+    }
+
+    totalKeystrokes += monkeyBuffers.length;
+
+    // 3. UI THROTTLING (This fixes your screen freezing)
+    frameCounter++;
+    if (frameCounter % 10 === 0) { // Only update the screen every 10 frames
+        document.getElementById('total-keys').innerText = totalKeystrokes.toLocaleString();
+        
+        let sortedIndices = Array.from(monkeyScores.keys()).sort((a, b) => monkeyScores[b] - monkeyScores[a]);
+        updateDOM(sortedIndices.slice(0, 10));
+    }
+
+    // 4. Halt Condition
+    if (bestScore === targetStr.length) {
+        isRunning = false;
+        // Force one final draw
+        let sortedIndices = Array.from(monkeyScores.keys()).sort((a, b) => monkeyScores[b] - monkeyScores[a]);
+        updateDOM(sortedIndices.slice(0, 10));
+        console.log(`Truth String Found via Boolean Evolution in ${totalKeystrokes} keystrokes.`);
+    } else {
+        animationId = requestAnimationFrame(tick);
+    }
+}
 
     // Global Stats
     totalKeystrokes += monkeyBuffers.length;

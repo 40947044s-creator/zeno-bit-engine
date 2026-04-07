@@ -16,14 +16,11 @@
             <label>Monkeys (Threads):</label>
             <input type="number" id="monkeyCount" value="10000" min="10" max="50000">
             
-            <button onclick="startSimulation()">Restart Universe</button>
+            <button id="toggleBtn" onclick="togglePause()">Pause Universe</button>
+            <button id="resetBtn" onclick="resetUniverse()" style="background: #ff3333; color: white;">Hard Reset</button>
+            
             <a href="zeno.html" style="color:#0a0; margin-left:20px;">[View Zeno Gravity Engine]</a>
         </div>
-        <div id="stats">
-            <div>Expected Time: <span id="math-time" class="highlight">...</span></div>
-            <div id="total-keys-display">Total Lifetime Keystrokes: <span id="total-keys" class="highlight">0</span></div>
-        </div>
-    </div>
 
     <div class="stage">
         <div class="panel" id="leaderboard">

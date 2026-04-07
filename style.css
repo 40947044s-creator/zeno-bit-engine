@@ -1,8 +1,63 @@
-body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; }
-.stage { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
-.panel { width: 400px; height: 600px; border: 2px solid #222; position: relative; background: #000; }
-.apple { width: 30px; height: 30px; border-radius: 50%; position: absolute; left: 185px; }
-.red { background: #ff3333; box-shadow: 0 0 15px #f00; transition: top 0.1s linear; }
-.ghost { background: rgba(0, 255, 65, 0.4); border: 1px dashed #0f0; }
-.debug { position: absolute; bottom: 10px; left: 10px; font-size: 10px; color: #0a0; }
-#ui { text-align: center; padding: 20px; }
+body { 
+    background: #050505; 
+    color: #00ff41; 
+    font-family: 'Courier New', monospace; 
+    margin: 0;
+}
+.stage { 
+    display: flex; 
+    justify-content: center; 
+    gap: 20px; 
+    margin-top: 20px; 
+}
+.panel { 
+    width: 400px; 
+    height: 600px; 
+    border: 2px solid #222; 
+    position: relative; 
+    background: #000; 
+    overflow: hidden;
+}
+h3 {
+    text-align: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+.apple { 
+    width: 30px; 
+    height: 30px; 
+    border-radius: 50%; 
+    position: absolute; 
+    left: 185px; 
+}
+.red { 
+    background: #ff3333; 
+    box-shadow: 0 0 15px #f00; 
+}
+.ghost { 
+    background: rgba(0, 255, 65, 0.4); 
+    border: 1px dashed #0f0; 
+}
+.debug { 
+    position: absolute; 
+    bottom: 10px; 
+    left: 10px; 
+    font-size: 12px; 
+    color: #0a0; 
+}
+#ui { 
+    text-align: center; 
+    padding: 20px; 
+}
+button {
+    background: #00ff41;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: monospace;
+}
+button:hover {
+    background: #00cc33;
+}

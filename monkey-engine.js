@@ -3,7 +3,67 @@
 // --- THE GENETIC BOOLEAN KERNEL ---
 
 let frameCounter = 0; // Used to slow down the visual updates so the screen doesn't freeze
+// --- STATE CONTROLS (Pause & Reset) ---
 
+function togglePause() {
+    const btn = document.getElementById('toggleBtn');
+    
+    if (isRunning) {
+        // Freeze the universe
+        isRunning = false;
+        cancelAnimationFrame(animationId);
+        
+        // Update UI to show it is paused
+        btn.innerText = "Resume Universe";
+        btn.style.background = "#ffaa00"; // Change to yellow warning color
+        
+        saveState(); // Save the exact keystrokes in case they close the tab while paused
+        console.log("Universe Paused. Wave function frozen.");
+    } else {
+        // Resume the universe
+        isRunning = true;
+        
+        // Update UI to show it is running
+        btn.innerText = "Pause Universe";
+        btn.style.background = "#00ff41"; // Back to hacker green
+        
+        console.log("Universe Resumed. Re-engaging Boolean collisions.");
+        tick(); // Restart the engine loop
+    }
+}
+
+function resetUniverse() {
+    // Wipe the offline memory
+    totalKeystrokes = 0;
+    localStorage.removeItem('zeno_totalKeystrokes');
+    
+    // Restart the simulation from scratch
+    startSimulation();
+}
+
+// Update your existing startSimulation function slightly to ensure 
+// the pause button resets visually when you change the target word:
+function startSimulation() {
+    targetStr = document.getElementById('target').value;
+    const numMonkeys = parseInt(document.getElementById('monkeyCount').value);
+    const len = targetStr.length;
+    
+    if (len === 0) return;
+
+    // Allocate fresh memory
+    monkeyBuffers = Array.from({ length: numMonkeys }, () => Array(len).fill(' '));
+    monkeyScores = new Int32Array(numMonkeys);
+    
+    calculateMath();
+    
+    // Reset toggle button UI
+    document.getElementById('toggleBtn').innerText = "Pause Universe";
+    document.getElementById('toggleBtn').style.background = "#00ff41";
+    
+    isRunning = true;
+    if (animationId) cancelAnimationFrame(animationId);
+    tick();
+}
 function tick() {
     if (!isRunning) return;
 

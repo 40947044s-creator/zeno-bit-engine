@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="ui">
-        <h2>The Stochastic Typewriter (NIV Bible Scale)</h2>
+        <h2>The Stochastic Typewriter (NP-Search)</h2>
         <div class="controls">
             <label>Target Text:</label>
             <input type="text" id="target" value="IN THE BEGINNING" maxlength="50" oninput="this.value = this.value.toUpperCase()">
@@ -17,9 +17,10 @@
             <input type="number" id="monkeyCount" value="10000" min="10" max="50000">
             
             <button onclick="startSimulation()">Restart Universe</button>
+            <a href="zeno.html" style="color:#0a0; margin-left:20px;">[View Zeno Gravity Engine]</a>
         </div>
         <div id="stats">
-            <div>Theoretical Expected Time: <span id="math-time" class="highlight">...</span></div>
+            <div>Expected Time: <span id="math-time" class="highlight">...</span></div>
             <div id="total-keys-display">Total Lifetime Keystrokes: <span id="total-keys" class="highlight">0</span></div>
         </div>
     </div>
@@ -27,8 +28,7 @@
     <div class="stage">
         <div class="panel" id="leaderboard">
             <h3>Top 10 Monkeys (Lowest Hamming Distance)</h3>
-            <ul id="rankings">
-                </ul>
+            <ul id="rankings"></ul>
         </div>
     </div>
     <script src="monkey-engine.js"></script>

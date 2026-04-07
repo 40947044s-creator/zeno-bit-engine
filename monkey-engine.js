@@ -1,100 +1,61 @@
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "; 
-
-let targetStr = "";
-let monkeyBuffers = [];
-let monkeyScores = [];
-let isRunning = false;
-let animationId;
-let totalKeystrokes = 0;
-
-// --- PERSISTENCE ENGINE ---
-function saveState() {
-    localStorage.setItem('zeno_lastActive', Date.now());
-    localStorage.setItem('zeno_totalKeystrokes', totalKeystrokes);
-}
-
-function loadState() {
-    const lastActive = localStorage.getItem('zeno_lastActive');
-    const savedKeystrokes = localStorage.getItem('zeno_totalKeystrokes');
-    const numMonkeys = parseInt(document.getElementById('monkeyCount').value) || 10000;
-    
-    if (savedKeystrokes) totalKeystrokes = parseInt(savedKeystrokes);
-    
-    if (lastActive) {
-        const timeAwaySec = Math.floor((Date.now() - parseInt(lastActive)) / 1000);
-        const missedKeystrokes = timeAwaySec * 60 * numMonkeys; 
-        totalKeystrokes += missedKeystrokes;
-    }
-}
-
-window.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') saveState();
-    else loadState();
-});
-window.addEventListener('beforeunload', saveState);
-
-// --- MATH ENGINE ---
-function calculateMath() {
-    const len = document.getElementById('target').value.length;
-    const monkeys = parseInt(document.getElementById('monkeyCount').value);
-    let seconds = Math.pow(27, len) / (monkeys * 60);
-    
-    let displayTime;
-    if (seconds < 60) displayTime = `${Math.round(seconds)} Seconds`;
-    else if (seconds < 3600) displayTime = `${Math.round(seconds/60)} Minutes`;
-    else if (seconds < 86400) displayTime = `${Math.round(seconds/3600)} Hours`;
-    else if (seconds < 31536000) displayTime = `${Math.round(seconds/86400)} Days`;
-    else displayTime = `${Math.toExponential(seconds / 31536000)} Years`;
-    
-    document.getElementById('math-time').innerText = displayTime;
-}
-
-// --- SIMULATION CORE ---
-function startSimulation() {
-    targetStr = document.getElementById('target').value;
-    const numMonkeys = parseInt(document.getElementById('monkeyCount').value);
-    const len = targetStr.length;
-    
-    if (len === 0) return;
-
-    monkeyBuffers = Array.from({ length: numMonkeys }, () => Array(len).fill(' '));
-    monkeyScores = new Int32Array(numMonkeys);
-    
-    calculateMath();
-    isRunning = true;
-    if (animationId) cancelAnimationFrame(animationId);
-    tick();
-}
-
-function getHammingScore(buffer) {
-    let score = 0;
-    for (let i = 0; i < targetStr.length; i++) {
-        if (buffer[i] === targetStr[i]) score++;
-    }
-    return score;
-}
+// Replace everything from function tick() down to the end of updateDOM()
 
 function tick() {
     if (!isRunning) return;
 
     let bestScore = -1;
+    
+    // THE OPTIMIZATION: Only track the Top 10 champions, don't sort the whole universe
+    let top10Ids = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+    let top10Scores = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
 
+    // The Universe Loop
     for (let i = 0; i < monkeyBuffers.length; i++) {
         let buffer = monkeyBuffers[i];
-        for (let j = 0; j < buffer.length - 1; j++) buffer[j] = buffer[j + 1];
+        
+        // Shift buffer left
+        for (let j = 0; j < buffer.length - 1; j++) {
+            buffer[j] = buffer[j + 1];
+        }
+        
+        // New random keystroke
         buffer[buffer.length - 1] = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
 
-        let score = getHammingScore(buffer);
-        monkeyScores[i] = score;
+        // Evaluate Fitness (Inlined for maximum speed)
+        let score = 0;
+        for (let s = 0; s < targetStr.length; s++) {
+            if (buffer[s] === targetStr[s]) score++;
+        }
+        
+        monkeyScores[i] = score; // Save score for the UI
         if (score > bestScore) bestScore = score;
+
+        // Instantly check if this monkey belongs on the Leaderboard
+        if (score > top10Scores[9]) {
+            let insertIdx = 9;
+            // Find its rightful rank
+            while (insertIdx > 0 && score > top10Scores[insertIdx - 1]) {
+                insertIdx--;
+            }
+            // Shift the lower monkeys down
+            for (let k = 9; k > insertIdx; k--) {
+                top10Scores[k] = top10Scores[k - 1];
+                top10Ids[k] = top10Ids[k - 1];
+            }
+            // Insert the new champion
+            top10Scores[insertIdx] = score;
+            top10Ids[insertIdx] = i;
+        }
     }
 
+    // Global Stats
     totalKeystrokes += monkeyBuffers.length;
     document.getElementById('total-keys').innerText = totalKeystrokes.toLocaleString();
 
-    let sortedIndices = Array.from(monkeyScores.keys()).sort((a, b) => monkeyScores[b] - monkeyScores[a]);
-    updateDOM(sortedIndices.slice(0, 10));
+    // Update UI instantly
+    updateDOM(top10Ids);
 
+    // Halt condition
     if (bestScore === targetStr.length) {
         isRunning = false;
         console.log("Truth String Found! Wave function collapsed.");
@@ -108,6 +69,8 @@ function updateDOM(topIndices) {
     list.innerHTML = ''; 
 
     topIndices.forEach((monkeyIndex, rank) => {
+        if (monkeyIndex === -1) return; // Ignore empty slots before the board fills up
+
         const buffer = monkeyBuffers[monkeyIndex];
         const score = monkeyScores[monkeyIndex];
         
@@ -126,9 +89,3 @@ function updateDOM(topIndices) {
         list.appendChild(li);
     });
 }
-
-// Auto-start
-window.onload = function() {
-    loadState();
-    setTimeout(startSimulation, 500); 
-};
